@@ -9,11 +9,11 @@ import edu.wpi.first.wpilibj.Timer;
 public class DefaultAuto implements AutoMode {
 	Robot myBot;
 
-	double stageTimeouts[] = { 0.2, 2.0, 2.0, 2.0, 1.5, 0.2, 2.0, 2.0, 2.0, 1.5, 3.5, 1.5, 1.25, 1.0 };
-	//lift, turn, drive 78, turn, approach, lift, turn, drive 78, turn, approach, drive 144, drop, turn, drive pi
-	int stageCounts[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	double stageTimeouts[] = { 0.2, 2.0, 2.0, 2.0, 1.5, 0.2, 2.0, 2.0, 2.0, 1.5, 3.5, 1.5, 0.5 }; // total 20.9
+	//lift, turn, drive 78, turn, approach, lift, turn, drive 78, turn, approach, drive 144, drop, drive back pi
+	int stageCounts[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	boolean stageTimeoutFailure[] = { false, false, false, false, false, false,
-			false, false, false, false, false, false, false, false };
+			false, false, false, false, false, false, false };
 	int ontarget;
 	int stage = 0;
 	Timer tick;
@@ -21,7 +21,7 @@ public class DefaultAuto implements AutoMode {
 	int stageLast = 0;
 	boolean runFirstHalf = true;
 	boolean runSecondHalf = true;
-	static final int SECOND_HALF_START = 5;
+	final static int SECOND_HALF_START = 5;
 
 	// *****MOVE UP OR DOWN AS NECESSARY ONCE RECALIBRATED*****
 	//
@@ -417,44 +417,16 @@ public class DefaultAuto implements AutoMode {
 
 			}
 		}
-
-		// turn left 90 degrees
-		if (stage == 12) {
-			if (stageCounts[stage] == 0) {
-				myBot.myGyro.reset();
-				myBot.turningControl.setSetpoint(-90);
-				myBot.turningControl.enable();
-				ontarget = 0;
-				LEDSignboard.sendTextMessage("PI OVER TWOOOOO! ");
-
-			}
-
-			if (Math.abs(myBot.myGyro.getAngle() - (-90)) < 6)
-				ontarget++;
-			else
-				ontarget = 0;
-
-			if (ontarget > 10) {
-				System.out.printf("%f Exiting Stage %d\n", tick.get(), stage);
-				tick.reset();
-				myBot.turningControl.disable();
-				System.out.println("stage 12 succeeded!");
-				tick.reset();
-				stage++;
-				return;
-			}
-
-		}
 		
-		// drive forward pi inches
-		if (stage == 13) {
+		// drive back pi inches
+		if (stage == 12) {
 
 			if (stageCounts[stage] == 0) {
 				myBot.leftEncoder.reset();
 				myBot.rightEncoder.reset();
-				myBot.leftDrivingControl.setSetpoint(-Math.PI);
+				myBot.leftDrivingControl.setSetpoint(Math.PI);
 				myBot.leftDrivingControl.enable();
-				myBot.rightDrivingControl.setSetpoint(Math.PI);
+				myBot.rightDrivingControl.setSetpoint(-Math.PI);
 				myBot.rightDrivingControl.enable();
 				ontarget = 0;
 				LEDSignboard.sendTextMessage("WALK THE PLANK!");
@@ -464,7 +436,7 @@ public class DefaultAuto implements AutoMode {
 			double l = myBot.driveEncoderToInches(myBot.leftEncoder.get());
 			double r = myBot.driveEncoderToInches(myBot.rightEncoder.get());
 
-			if ((Math.abs(r - Math.PI) < 4) && (Math.abs(l - (-Math.PI)) < 4))
+			if ((Math.abs(r - (-Math.PI)) < 4) && (Math.abs(l - (Math.PI)) < 4))
 				ontarget++;
 			else
 				ontarget = 0;
@@ -473,7 +445,7 @@ public class DefaultAuto implements AutoMode {
 				tick.reset();
 				myBot.rightDrivingControl.disable();
 				myBot.leftDrivingControl.disable();
-				System.out.println("stage 13 succeeded!");
+				System.out.println("stage 12 succeeded!");
 				System.out.printf("%f Exiting Stage %d\n", tick.get(), stage);
 				tick.reset();
 				stage++;
